@@ -2,7 +2,7 @@ TEMPLATE =	lib
 
 CONFIG += c++14
 
-INCLUDEPATH += "include"
+INCLUDEPATH += "$_PRO_FILE_PWD_/include"
 
 TARGET =	transport
 
