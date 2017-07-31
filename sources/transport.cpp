@@ -1,3 +1,5 @@
+#include <curl/curl.h>
+#include <stdexcept>
 #include "transport.hpp"
 
 namespace Transport
@@ -7,7 +9,7 @@ namespace Transport
 	{
 	}
 	
-	TransportImpl(const TransportImpl&& other)
+	TransportImpl(TransportImpl&& other)
 	{
 		curl_ = other.curl_;
         that.curl_ = nullptr;
@@ -48,7 +50,7 @@ namespace Transport
 			throw std::logic_error("curl_ not initialise.");
 		}
 		
-		curl_easy_setopt(curl_, CURLOPT_URL, settings.getConnection());
+		curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
 		// example.com is redirected, so we tell libcurl to follow redirection
 		curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1L);
 		
@@ -59,7 +61,7 @@ namespace Transport
 		curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &buffer_);
 		
 		/* Perform the request, res will get the return code */ 
-		res = curl_easy_perform(curl_);
+		CURLcode res = curl_easy_perform(curl_);
 		/* Check for errors */ 
 		if(res != CURLE_OK)
 		{
@@ -73,13 +75,13 @@ namespace Transport
 	{
 		if(curl_)
 		{
-			curl_easy_setopt(curl_, CURLOPT_URL, settings.getConnection());
+			curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
 			// perform transfer
 			CURLcode code = curl_easy_perform(curl_);
 			// check if everything went fine
 			if(code == CURLE_OK)
 			{
-				return std::move(buffer);
+				return std::move(buffer_);
 			}
 			// clear the buffer
 			//buffer.clear();

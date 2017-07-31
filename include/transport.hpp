@@ -9,7 +9,7 @@ class TransportImpl
 public:
 	explicit TransportImpl(const Setting::Settings& settings);
 	~TransportImpl();
-	TransportImpl(const TransportImpl&& other);
+	TransportImpl(TransportImpl&& other);
 	TransportImpl& operator=(const TransportImpl&&);
 	
 	void initialise();

@@ -1,17 +1,14 @@
-TEMPLATE =	lib
-
-#MAKEFLAGS="-j8"
+TEMPLATE =	app
 
 CONFIG += c++14
 
 INCLUDEPATH += "$$_PRO_FILE_PWD_/include"
-INCLUDEPATH += "$$_PRO_FILE_PWD_/../settings/include"
 
-TARGET =	transport
+TARGET =	testtransport
 
 HEADERS +=	include/transport.hpp
 
-SOURCES +=      sources/transport.cpp
+#SOURCES +=      sources/transport.cpp
 
 CONFIG(debug, debug|release) {
     #DESTDIR = ../build/debug/$$TARGET
