@@ -2,6 +2,8 @@ TEMPLATE =	lib
 
 CONFIG += c++14
 
+INCLUDEPATH += "$$_PRO_FILE_PWD_/include"
+
 TARGET =	transport
 
 HEADERS +=	include/transport.hpp
