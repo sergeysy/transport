@@ -5,16 +5,15 @@ TEMPLATE =	lib
 CONFIG += c++14
 
 INCLUDEPATH += "$$_PRO_FILE_PWD_/include"
-INCLUDEPATH += "$$_PRO_FILE_PWD_/../settings/include"
+INCLUDEPATH += "$$LIB_SETTINGS_DIR/include"
 
-TARGET =	transport
+TARGET = $$LIBTRANSPORT
 
 HEADERS +=	include/transport.hpp
 
 SOURCES +=      sources/transport.cpp
 
 CONFIG(debug, debug|release) {
-    #DESTDIR = ../build/debug/$$TARGET
     DESTDIR = $$ROOT_DIR/build/debug/$$TARGET
 } else {
     DESTDIR = $$ROOT_DIR/build/release/$$TARGET

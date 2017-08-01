@@ -1,21 +1,31 @@
+#include <string>
+
 #include <curl/curl.h>
+
 #include <stdexcept>
+#include "settings.hpp"
 #include "transport.hpp"
 
 namespace Transport
 {
+	TransportImpl::TransportImpl()
+	    :curl_(nullptr)
+	{
+	}
+
 	TransportImpl::TransportImpl(const Setting::Settings& settings)
 		: settings_(settings)
 	{
 	}
 	
-	TransportImpl(TransportImpl&& other)
+	//TransportImpl(TransportImpl&& other)
+	/*TransportImpl(TransportImpl&& other)
 	{
 		curl_ = other.curl_;
         that.curl_ = nullptr;
-	}
+	}*/
 	
-	TransportImpl& TransportImpl::operator=(const TransportImpl&& other)
+	TransportImpl& TransportImpl::operator=(TransportImpl&& other)
 	{
 		std::swap(curl_, other.curl_);
 		return *this;

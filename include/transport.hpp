@@ -1,16 +1,24 @@
 #pragma once
 
-#include "settings.hpp"
+#include <string>
+
+#include <curl/curl.h>
+
+namespace Setting
+{
+    class Settings;
+}
 
 namespace Transport
 {
 class TransportImpl
 {
 public:
+	TransportImpl();
 	explicit TransportImpl(const Setting::Settings& settings);
 	~TransportImpl();
 	TransportImpl(TransportImpl&& other);
-	TransportImpl& operator=(const TransportImpl&&);
+	TransportImpl& operator=( TransportImpl&&);
 	
 	void initialise();
 	std::string getWhiteList(const std::string& query) const;
