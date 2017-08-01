@@ -14,10 +14,12 @@ namespace Transport
 class TransportImpl
 {
 public:
-	TransportImpl();
-	explicit TransportImpl(const Setting::Settings& settings);
+	//TransportImpl();
+	TransportImpl(const Setting::Settings& settings);
 	~TransportImpl();
-	TransportImpl(TransportImpl&& other);
+	TransportImpl(TransportImpl&& other){ curl_ = other.curl_;}
+	//TransportImpl( TransportImpl&&){}
+	//TransportImpl(TransportImpl&);
 	TransportImpl& operator=( TransportImpl&&);
 	
 	void initialise();

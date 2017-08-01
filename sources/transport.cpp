@@ -8,34 +8,27 @@
 
 namespace Transport
 {
-	TransportImpl::TransportImpl()
+	/*TransportImpl::TransportImpl()
 	    :curl_(nullptr)
 	{
-	}
+	}*/
 
 	TransportImpl::TransportImpl(const Setting::Settings& settings)
 		: settings_(settings)
 	{
 	}
 	
-	//TransportImpl(TransportImpl&& other)
-	/*TransportImpl(TransportImpl&& other)
-	{
-		curl_ = other.curl_;
-        that.curl_ = nullptr;
-	}*/
-	
 	TransportImpl& TransportImpl::operator=(TransportImpl&& other)
 	{
-		std::swap(curl_, other.curl_);
-		return *this;
+	    std::swap(curl_, other.curl_);
+	    return *this;
 	}
 	
 	TransportImpl::~TransportImpl()
 	{
 		if(curl_ != nullptr)
 		{
-			/* always cleanup */ 
+			// always cleanup
 			curl_easy_cleanup(curl_);
 			curl_ = nullptr;
 		}
@@ -60,7 +53,9 @@ namespace Transport
 			throw std::logic_error("curl_ not initialise.");
 		}
 		
-		curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
+		//curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
+		curl_easy_setopt(curl_, CURLOPT_URL,
+		     "http://192.168.50.121:8082/service/checkreg?phoneNumber=0079165364242");
 		// example.com is redirected, so we tell libcurl to follow redirection
 		curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1L);
 		
@@ -81,11 +76,23 @@ namespace Transport
 	 
 	}
 	
-	std::string TransportImpl::getWhiteList(const std::string& query) const
+	std::string TransportImpl::getWhiteList(const std::string& /*query*/) const
 	{
 		if(curl_)
 		{
-			curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
+			//curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
+
+		curl_easy_setopt(curl_, CURLOPT_URL,
+		     "http://192.168.50.121:8082/service/checkreg?phoneNumber=0079165364242");
+		// example.com is redirected, so we tell libcurl to follow redirection
+		curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1L);
+		
+		curl_easy_setopt(curl_, CURLOPT_VERBOSE, 0);
+		curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1);
+		curl_easy_setopt(curl_, CURLOPT_USERAGENT, "Validator/1.0");
+		curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &writeCallback);
+		curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &buffer_);
+		
 			// perform transfer
 			CURLcode code = curl_easy_perform(curl_);
 			// check if everything went fine

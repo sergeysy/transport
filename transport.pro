@@ -1,7 +1,5 @@
 TEMPLATE =	lib
 
-#MAKEFLAGS="-j8"
-
 CONFIG += c++14
 
 INCLUDEPATH += "$$_PRO_FILE_PWD_/include"
@@ -23,6 +21,8 @@ OBJECTS_DIR = "$$DESTDIR/.obj"
 MOC_DIR = "$$DESTDIR/.moc"
 RCC_DIR = "$$DESTDIR/.qrc"
 UI_DIR = "$$DESTDIR/.u"
+
+LIBS += -lcurl
 
 # source code encoding
 QMAKE_CXXFLAGS += -finput-charset="UTF-8"
