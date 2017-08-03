@@ -1,6 +1,7 @@
 TEMPLATE =	lib
 
 CONFIG += c++14
+CONFIG += staticlib
 
 INCLUDEPATH += "$$_PRO_FILE_PWD_/include"
 INCLUDEPATH += "$$LIB_SETTINGS_DIR/include"

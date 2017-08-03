@@ -23,7 +23,7 @@ public:
 	TransportImpl& operator=( TransportImpl&&);
 	
 	void initialise();
-	std::string getWhiteList(const std::string& query) const;
+	std::string getWhiteList(const std::string& query);
 	
 private:
 	Setting::Settings settings_;
