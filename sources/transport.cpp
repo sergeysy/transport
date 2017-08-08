@@ -15,8 +15,8 @@ namespace Transport
 	{
 	}*/
 
-	TransportImpl::TransportImpl(const Setting::Settings& settings)
-		: settings_(std::move(settings))
+    TransportImpl::TransportImpl(const Setting::Settings& settings)
+        : settings_(settings)
 	{
 	}
 	
@@ -93,7 +93,7 @@ static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)
     return 0;
 }
 
-CURLcode curl_read(const std::string& url, std::ostream& os, long timeout = 30)
+CURLcode curl_read(const std::string& url, std::ostream& /*os*/, long timeout = 30)
 {
     CURLcode code(CURLE_FAILED_INIT);
     CURL* curl = curl_easy_init();

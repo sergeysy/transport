@@ -26,7 +26,7 @@ public:
 	std::string getWhiteList(const std::string& query);
 	
 private:
-	Setting::Settings settings_;
+    Setting::Settings settings_;
 	CURL *curl_ = nullptr;
 	std::string buffer_;
 

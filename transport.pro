@@ -27,3 +27,4 @@ LIBS += -lcurl
 
 # source code encoding
 QMAKE_CXXFLAGS += -finput-charset="UTF-8"
+QMAKE_CXXFLAGS += -Werror
