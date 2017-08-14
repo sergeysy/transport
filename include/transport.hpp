@@ -15,12 +15,24 @@ class TransportImpl
 {
 public:
 	//TransportImpl();
-	TransportImpl(const Setting::Settings& settings);
+    explicit TransportImpl(const Setting::Settings& settings);
+    /*{
+        std::swap(curl_, other.curl_);
+        std::swap(settings_, other.settings_);
+        return *this;
+    };*/
 	~TransportImpl();
-	TransportImpl(TransportImpl&& other){ curl_ = other.curl_;}
-	//TransportImpl( TransportImpl&&){}
-	//TransportImpl(TransportImpl&);
-	TransportImpl& operator=( TransportImpl&&);
+    TransportImpl( TransportImpl&& other) = delete;
+    /*{
+        std::swap(curl_, other.curl_);
+        //std::swap(settings_, other.settings_);
+        settings_ = other.settings_;
+        other.curl_ = nullptr;
+        other.settings_ = Setting::Settings();
+    }*/
+
+    //TransportImpl(TransportImpl&);
+    TransportImpl& operator=( TransportImpl&&) = delete;
 	
 	void initialise();
 	std::string getWhiteList(const std::string& query);

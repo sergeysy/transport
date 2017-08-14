@@ -20,12 +20,12 @@ namespace Transport
 	{
 	}
 	
-	TransportImpl& TransportImpl::operator=(TransportImpl&& other)
+    /*TransportImpl& TransportImpl::operator=(TransportImpl&& other)
 	{
 	    std::swap(curl_, other.curl_);
 	    std::swap(settings_, other.settings_);
 	    return *this;
-	}
+    }*/
 	
 	TransportImpl::~TransportImpl()
 	{
@@ -126,19 +126,27 @@ CURLcode curl_read(const std::string& url, std::ostream& /*os*/, long timeout = 
 		if(curl_)
 		{
 			//curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
-		//const auto request
-		std::cerr<<"URL:\""<<settings_.getConnection()<<query<<"\""<<std::endl;
-		curl_easy_setopt(curl_, CURLOPT_URL,
-		    (settings_.getConnection()
-		    +query).c_str()
-		    );
-		struct curl_slist *chunk = NULL;
-		chunk = curl_slist_append(chunk, "Accept: application/json");
-		curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
+            //const auto request
+            std::cerr<<"URL:\""<<settings_.getConnection()<<query<<"\""<<std::endl;
+            curl_easy_setopt(curl_, CURLOPT_URL,
+                (settings_.getConnection()
+                +query).c_str()
+                );
+            struct curl_slist *chunk = NULL;
+            chunk = curl_slist_append(chunk, "Accept: application/json");
+            curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
 
-		curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &writeCallback);
-		curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &buffer_);
-		
+            curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &writeCallback);
+            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &buffer_);
+            /*
+             * WARNING WE DISABLE SSL VERIFY CERTIFICATE
+            */
+            curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 0L);
+            curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYHOST, 0L);
+            /*
+             * WARNING END
+            */
+
 			// perform transfer
 			CURLcode code = curl_easy_perform(curl_);
 			// check if everything went fine
@@ -157,10 +165,11 @@ CURLcode curl_read(const std::string& url, std::ostream& /*os*/, long timeout = 
 		else
 		{
 		    std::cerr<<"curl not initialised!";
-		    return std::string();
+            return std::string();
 		}
 		curl_global_cleanup();
 
+        return std::string();
 	    /*curl_global_init(CURL_GLOBAL_ALL);
 	    std::ostringstream oss;
 std::cerr<<settings_.getConnection()<<query<<" kjhkjhkjh"<<std::endl;
