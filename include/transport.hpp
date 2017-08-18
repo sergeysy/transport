@@ -35,12 +35,11 @@ public:
     TransportImpl& operator=( TransportImpl&&) = delete;
 	
 	void initialise();
-	std::string getWhiteList(const std::string& query);
-	
+    std::string getHttp(const std::string& query);
+    std::string postHttp(const std::string& query);
+
 private:
     Setting::Settings settings_;
-	CURL *curl_ = nullptr;
-	std::string buffer_;
 
 	// disable copy, assign. enable only move
 	TransportImpl(const TransportImpl&) = delete;
