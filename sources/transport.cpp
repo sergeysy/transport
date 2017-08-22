@@ -5,31 +5,17 @@
 
 #include <curl/curl.h>
 
-#include "settings.hpp"
 #include "transport.hpp"
 #include "logger.hpp"
 
 namespace Transport
 {
-	/*TransportImpl::TransportImpl()
-	    :curl_(nullptr)
-	{
-	}*/
-
-    TransportImpl::TransportImpl(const Setting::Settings& settings)
-        : settings_(settings)
+    TransportImpl::TransportImpl()
 	{
         curl_global_init(CURL_GLOBAL_DEFAULT);
 	}
 	
-    /*TransportImpl& TransportImpl::operator=(TransportImpl&& other)
-	{
-	    std::swap(curl_, other.curl_);
-	    std::swap(settings_, other.settings_);
-	    return *this;
-    }*/
-	
-	TransportImpl::~TransportImpl()
+    TransportImpl::~TransportImpl()
 	{
         curl_global_cleanup();
     }
@@ -47,157 +33,116 @@ namespace Transport
 
 	void TransportImpl::initialise()
 	{
-		/*curl_ = curl_easy_init();
-		if ( curl_ == nullptr )
-		{
-			throw std::logic_error("curl_ not initialise.");
-		}
-		*/
-		//curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
-		/*curl_easy_setopt(curl_, CURLOPT_URL,
-		    settings_.getConnection() + "/checkreg?phoneNumber=0079165364242");
-		// example.com is redirected, so we tell libcurl to follow redirection
-		curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1L);
-		
-		curl_easy_setopt(curl_, CURLOPT_VERBOSE, 0);
-		curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1);
-		curl_easy_setopt(curl_, CURLOPT_USERAGENT, "Validator/1.0");
-		curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &writeCallback);
-		curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &buffer_);
-		*/
-		/* Perform the request, res will get the return code */ 
-		/*CURLcode res = curl_easy_perform(curl_);
-		// Check for errors
-		if(res != CURLE_OK)
-		{
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-				  curl_easy_strerror(res));
-		}*/
-	 
 	}
-/*
-static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)
+class CURL_Wrapper
 {
-    if(userp)
+    CURL *curl_;
+    std::string localBuffer_;
+    std::string request_;
+public:
+    CURL_Wrapper()
+        :curl_(curl_easy_init())
     {
-	std::ostream& os = *static_cast<std::ostream*>(userp);
-	std::streamsize len = size * nmemb;
-	if(os.write(static_cast<char*>(buf), len))
-	    return len;
+        if(curl_ == nullptr)
+        {
+            throw std::logic_error("curl not initialised!");
+        }
+
+        curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &writeCallback);
+
+        curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &localBuffer_);
+
+        /*
+         * WARNING WE DISABLE SSL VERIFY CERTIFICATE
+        */
+        curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYHOST, 0L);
+        /*
+         * WARNING END
+        */
+
     }
 
-    return 0;
-}*/
-
-    std::string TransportImpl::getHttp(const std::string& query)
+    void setUrl(const std::string& request)
     {
-        curl_global_init(CURL_GLOBAL_DEFAULT);
-        CURL *curl_ = nullptr;
-        curl_ = curl_easy_init();
-        std::string result;
-        if(curl_)
+        request_ = request;
+        curl_easy_setopt(curl_, CURLOPT_URL, request.c_str());
+    }
+
+    std::string execute()
+    {
+        // perform transfer
+        CURLcode curl_code = curl_easy_perform(curl_);
+
+        if(curl_code == CURLE_OK)
         {
-            //curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
-            const auto request = settings_.getConnection()+query;
-            std::cerr<< logger() <<"URL:\""<< request <<"\""<<std::endl;
-            curl_easy_setopt(curl_, CURLOPT_URL, request.c_str());
-            struct curl_slist *chunk = NULL;
-            chunk = curl_slist_append(chunk, "Accept: application/json");
-            curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
-
-            curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &writeCallback);
-            std::string localBuffer;
-            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &localBuffer);
-            /*
-             * WARNING WE DISABLE SSL VERIFY CERTIFICATE
-            */
-            curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 0L);
-            curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYHOST, 0L);
-            /*
-             * WARNING END
-            */
-
-            // perform transfer
-            CURLcode code = curl_easy_perform(curl_);
-            // check if everything went fine
-            if(code == CURLE_OK)
+            std::cerr<< logger() <<localBuffer_.size()<<" bytes return request \""<< request_ <<"\":"<<std::endl<<localBuffer_<<std::endl;
+            long http_code = 0;
+            curl_easy_getinfo (curl_, CURLINFO_RESPONSE_CODE, &http_code);
+            std::cerr << logger() << "http code: " << http_code << std::endl;
+            if (http_code == 200 && curl_code != CURLE_ABORTED_BY_CALLBACK)
             {
-                std::cerr<< logger() <<localBuffer.size()<<" bytes return request \""<< request <<"\":"<<std::endl<<localBuffer<<std::endl;
-                result = std::move(localBuffer);
+                //Succeeded
+                return std::move(localBuffer_);
             }
             else
             {
-                fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(code));
+                 //Failed
+                throw std::logic_error("Http code: "+ std::to_string(http_code));
             }
-            curl_easy_cleanup(curl_);
         }
         else
         {
-            std::cerr<< logger() <<"curl not initialised!";
+            throw std::logic_error(std::string("curl_easy_perform() failed: ") + curl_easy_strerror(curl_code));
         }
-        curl_global_cleanup();
+    }
+
+    ~CURL_Wrapper()
+    {
+        std::cerr << logger() << __PRETTY_FUNCTION__ << std::endl;
+        curl_easy_cleanup(curl_);
+    }
+
+    operator CURL*() const { return curl_; }
+    operator CURL*&(){ return curl_; }
+};
+    std::string TransportImpl::getHttp(const std::string& service, const std::string& query)
+    {
+        CURL_Wrapper curl_;
+        std::string result;
+        const auto request = service+query;
+        std::cerr<< logger() <<"URL:\""<< request <<"\""<<std::endl;
+        curl_.setUrl(request);
+        struct curl_slist *chunk = NULL;
+        chunk = curl_slist_append(chunk, "Accept: application/json");
+        curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
+
+
+        result = curl_.execute();
 
         return result;
     }
 
-    std::string TransportImpl::postHttp(const std::string& query)
+    std::string TransportImpl::postHttp(const std::string& service, const std::string& query)
     {
-        CURL *curl_ = nullptr;
+        CURL_Wrapper curl_;
 
         std::string result;
-        curl_ = curl_easy_init();
-        if(curl_)
-        {
-            //curl_easy_setopt(curl_, CURLOPT_URL, settings_.getConnection());
-            const auto request = settings_.getConnection()+"/transactions";
-            std::cerr << logger() <<"URL:\""<< request << "\" POST: \"" <<query << "\"" <<std::endl;
-            curl_easy_setopt(curl_, CURLOPT_URL, request.c_str());
-            struct curl_slist *chunk = NULL;
-            chunk = curl_slist_append(chunk, "Accept: */*");
-            chunk = curl_slist_append(chunk, "application/x-www-form-urlencoded");
-            curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
 
-            curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &writeCallback);
-            std::string localBuffer;
-            curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &localBuffer);
-            /*
-             * WARNING WE DISABLE SSL VERIFY CERTIFICATE
-            */
-            curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 0L);
-            curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYHOST, 0L);
-            /*
-             * WARNING END
-            */
+        const auto request = service;
+        std::cerr << logger() <<"URL:\""<< request << "\" POST: \"" <<query << "\"" <<std::endl;
+        curl_.setUrl(request);
+        struct curl_slist *chunk = NULL;
+        chunk = curl_slist_append(chunk, "Accept: */*");
+        chunk = curl_slist_append(chunk, "application/x-www-form-urlencoded");
+        curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
 
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, query.c_str());
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, query.size());
-            curl_easy_setopt(curl_, CURLOPT_POST, 1L);
-            curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 100);
-            // perform transfer
-            CURLcode code = curl_easy_perform(curl_);
-            // check if everything went fine
-            if(code == CURLE_OK)
-            {
-                std::cerr<< logger() <<localBuffer.size()<<" bytes return request \""<< request <<"\":"<<std::endl<<localBuffer<<std::endl;
-                result = std::move(localBuffer);
-                //return std::move(localBuffer);
-            }
-            else
-            {
-                // clear the buffer
-                //buffer.clear();
-                fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(code));
-                //return std::string();
-            }
-            curl_easy_cleanup(curl_);
-        }
-        else
-        {
-            std::cerr<< logger() <<"curl not initialised!";
-            //return std::string();
-        }
+        curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, query.c_str());
+        curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, query.size());
+        curl_easy_setopt(curl_, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 100);
+        // perform transfer
+        result = curl_.execute();
 
         return result;
     }
