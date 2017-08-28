@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <boost/thread/recursive_mutex.hpp>
+
 #include <curl/curl.h>
 
 #include "enumdefinition.inl"
@@ -36,6 +38,8 @@ private:
 	TransportImpl& operator=(const TransportImpl&) = delete;
 
     StatusTransport::EnumType lastStatus_;
+
+    mutable boost::recursive_mutex  eventsMutex_;
 };
 
 }

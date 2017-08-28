@@ -121,6 +121,8 @@ public:
 };
     std::string TransportImpl::getHttp(const std::string& service, const std::string& query)
     {
+        boost::recursive_mutex::scoped_lock queue_lock(eventsMutex_);
+
         CURL_Wrapper curl_;
         std::string result;
         const auto request = service+query;
@@ -146,6 +148,7 @@ public:
 
     std::string TransportImpl::postHttp(const std::string& service, const std::string& query)
     {
+        boost::recursive_mutex::scoped_lock queue_lock(eventsMutex_);
         CURL_Wrapper curl_;
 
         std::string result;
@@ -155,7 +158,8 @@ public:
         curl_.setUrl(request);
         struct curl_slist *chunk = NULL;
         chunk = curl_slist_append(chunk, "Accept: */*");
-        chunk = curl_slist_append(chunk, "application/x-www-form-urlencoded");
+        //chunk = curl_slist_append(chunk, "application/x-www-form-urlencoded");
+        chunk = curl_slist_append(chunk, "text/tab-separated-values");
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
 
         curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, query.c_str());
