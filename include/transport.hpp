@@ -28,7 +28,8 @@ public:
 	
 	void initialise();
     std::string getHttp(const std::string& service, const std::string& query);
-    std::string postHttp(const std::string& service, const std::string& query);
+    std::string postTsvHttp(const std::string& service, const std::string& query);
+    std::string postJsonHttp(const std::string& service, const std::string& query);
 
     StatusTransport::EnumType getLastStatus() const;
 

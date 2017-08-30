@@ -42,6 +42,7 @@ class CURL_Wrapper
     std::string request_;
     StatusTransport::EnumType lastStatus_;
 
+    struct curl_slist *chunk_ = nullptr;
 public:
     CURL_Wrapper()
         :curl_(curl_easy_init())
@@ -72,6 +73,21 @@ public:
     {
         request_ = request;
         curl_easy_setopt(curl_, CURLOPT_URL, request.c_str());
+    }
+
+    /*template<class ... Types>
+    void curl_slist_append(Types)
+    {
+
+    }*/
+
+    void curl_slist_append(const std::string& value)
+    {
+        chunk_ = ::curl_slist_append(chunk_, value.c_str());
+    }
+    auto setopt_http_header()
+    {
+        return ::curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk_);
     }
 
     std::string execute()
@@ -108,6 +124,10 @@ public:
     ~CURL_Wrapper()
     {
         //std::cerr << logger() << __PRETTY_FUNCTION__ << std::endl;
+        if(chunk_)
+        {
+            curl_slist_free_all(chunk_);
+        }
         curl_easy_cleanup(curl_);
     }
 
@@ -127,10 +147,13 @@ public:
         std::string result;
         const auto request = service+query;
         //std::cerr<< logger() <<"URL:\""<< request <<"\""<<std::endl;
-        curl_.setUrl(request);
-        struct curl_slist *chunk = NULL;
-        chunk = curl_slist_append(chunk, "Accept: application/json");
+
+        /*curl_.curl_slist_append("Accept: application/json");
+        curl_.setopt_http_header();*/
+        struct curl_slist *chunk = nullptr;
+        chunk = ::curl_slist_append(chunk, "Accept: application/json");
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
+        curl_.setUrl(request);
 
         try
         {
@@ -146,7 +169,7 @@ public:
         return result;
     }
 
-    std::string TransportImpl::postHttp(const std::string& service, const std::string& query)
+    std::string TransportImpl::postTsvHttp(const std::string& service, const std::string& query)
     {
         boost::recursive_mutex::scoped_lock queue_lock(eventsMutex_);
         CURL_Wrapper curl_;
@@ -155,17 +178,54 @@ public:
 
         const auto request = service;
         //std::cerr << logger() <<"URL:\""<< request << "\" POST: \"" <<query << "\"" <<std::endl;
+
+        //struct curl_slist *chunk = nullptr;
+        //chunk = ::curl_slist_append(chunk, "Accept: */*");
+        //chunk = ::curl_slist_append(chunk, "Content-Type: text/tab-separated-values");
+        //curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
+        curl_.curl_slist_append("Content-Type: text/tab-separated-values");
+        curl_.setopt_http_header();
+
         curl_.setUrl(request);
-        struct curl_slist *chunk = NULL;
-        chunk = curl_slist_append(chunk, "Accept: */*");
-        //chunk = curl_slist_append(chunk, "application/x-www-form-urlencoded");
-        chunk = curl_slist_append(chunk, "text/tab-separated-values");
-        curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, chunk);
 
         curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, query.c_str());
         curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, query.size());
-        curl_easy_setopt(curl_, CURLOPT_POST, 1L);
-        curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 10);
+        //curl_easy_setopt(curl_, CURLOPT_POST, 1L);// library use a "Content-Type: application/x-www-form-urlencoded" header.
+        curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 1000);
+        // perform transfer
+        try
+        {
+            result = curl_.execute();
+            lastStatus_ = curl_.getLastStatus();
+        }
+        catch(...)
+        {
+            lastStatus_ = curl_.getLastStatus();
+            throw;
+        }
+
+        return result;
+    }
+
+    std::string TransportImpl::postJsonHttp(const std::string& service, const std::string& query)
+    {
+        boost::recursive_mutex::scoped_lock queue_lock(eventsMutex_);
+        CURL_Wrapper curl_;
+
+        std::string result;
+
+        const auto request = service;
+        //std::cerr << logger() <<"URL:\""<< request << "\" POST: \"" <<query << "\"" <<std::endl;
+
+        curl_.curl_slist_append("Content-Type: application/json");
+        curl_.setopt_http_header();
+
+        curl_.setUrl(request);
+
+        curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, query.c_str());
+        curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, query.size());
+        //curl_easy_setopt(curl_, CURLOPT_POST, 1L);// library use a "Content-Type: application/x-www-form-urlencoded" header.
+        curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 1000);
         // perform transfer
         try
         {
