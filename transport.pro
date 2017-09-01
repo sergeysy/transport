@@ -32,7 +32,7 @@ OBJECTS_DIR = \""$$DESTDIR/.obj\""
 
 win32
 {
-LIBS += -L"D:\Projects\validator\3rd_party\curl\build\Win64\VC14\LIB Debug"
+LIBS += -L"D:\Projects\validator\3rd_party\curl\build\Win32\VC14\LIB Debug"
 }
 win32
 {
