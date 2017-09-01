@@ -1,2 +1,4 @@
 Makefile
 Makefile.*
+/x64*
+*.vcxproj*
