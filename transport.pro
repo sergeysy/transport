@@ -9,8 +9,7 @@ CONFIG += staticlib
 INCLUDEPATH += "$$_PRO_FILE_PWD_/include"
 INCLUDEPATH += "$$LIB_SETTINGS_DIR/include"
 INCLUDEPATH += "$$LIB_UTILS_DIR/include"
-win32
-{
+win32 {
 INCLUDEPATH += 	"$$ROOT_DIR/3rd_party/curl/include"
 INCLUDEPATH += "$(BOOST_ROOT)"
 }
@@ -30,12 +29,10 @@ CONFIG(debug, debug|release) {
 
 OBJECTS_DIR = \""$$DESTDIR/.obj\""
 
-win32
-{
+win32 {
 LIBS += -L"D:\Projects\validator\3rd_party\curl\build\Win32\VC14\LIB Debug"
 }
-win32
-{
+win32 {
 LIBS += -llibcurld
 }
 unix {
