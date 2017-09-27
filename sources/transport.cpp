@@ -146,7 +146,7 @@ public:
         CURL_Wrapper curl_;
         std::string result;
         const auto request = service+query;
-        std::cerr<< logger() <<"URL:\""<< service <<"\" Query:\""<< query << "\""<<std::endl;
+        //std::cerr<< logger() <<"URL:\""<< request <<"\""<<std::endl;
 
         /*curl_.curl_slist_append("Accept: application/json");
         curl_.setopt_http_header();*/
