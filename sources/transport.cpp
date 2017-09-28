@@ -146,7 +146,7 @@ public:
         CURL_Wrapper curl_;
         std::string result;
         const auto request = service+query;
-        //std::cerr<< logger() <<"URL:\""<< request <<"\""<<std::endl;
+        std::cerr<< logger() <<"URL:\""<< request <<"\""<<std::endl;
 
         /*curl_.curl_slist_append("Accept: application/json");
         curl_.setopt_http_header();*/
@@ -177,7 +177,7 @@ public:
         std::string result;
 
         const auto request = service;
-        //std::cerr << logger() <<"URL:\""<< request << "\" POST: \"" <<query << "\"" <<std::endl;
+        std::cerr << logger() <<"URL:\""<< request << "\" POST: \"" <<query << "\"" <<std::endl;
 
         //struct curl_slist *chunk = nullptr;
         //chunk = ::curl_slist_append(chunk, "Accept: */*");
