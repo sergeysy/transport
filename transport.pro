@@ -9,8 +9,8 @@ CONFIG += staticlib
 INCLUDEPATH += "$$_PRO_FILE_PWD_/include"
 INCLUDEPATH += "$$LIB_SETTINGS_DIR/include"
 INCLUDEPATH += "$$LIB_UTILS_DIR/include"
-win32 {
 INCLUDEPATH += 	"$$ROOT_DIR/3rd_party/curl/include"
+win32 {
 INCLUDEPATH += "$(BOOST_ROOT)"
 }
 
