@@ -4,8 +4,6 @@
 
 #include <boost/thread/recursive_mutex.hpp>
 
-#include <curl/curl.h>
-
 #include "enumdefinition.inl"
 
 DECLARE_ENUM_4(StatusTransport,
