@@ -22,9 +22,9 @@ HEADERS +=	"$$ROOT_DIR/3rd_party/curl/include"
 SOURCES +=      sources/transport.cpp
 
 CONFIG(debug, debug|release) {
-    DESTDIR = "$$ROOT_DIR/build/debug/$$TARGET"
+    DESTDIR = "$$ROOT_DIR/$$BUILD_MV3000_DIR/debug/$$TARGET"
 } else {
-    DESTDIR = "$$ROOT_DIR/build/release/$$TARGET"
+    DESTDIR = "$$ROOT_DIR/$$BUILD_MV3000_DIR/release/$$TARGET"
 }
 
 OBJECTS_DIR = \""$$DESTDIR/.obj\""
