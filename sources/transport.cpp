@@ -158,11 +158,11 @@ public:
         try
         {
             result = curl_.execute();
-            lastStatus_ = curl_.getLastStatus();
+            setStatuses(curl_.getLastStatus());
         }
         catch(...)
         {
-            lastStatus_ = curl_.getLastStatus();
+            setStatuses(curl_.getLastStatus());
             throw;
         }
 
@@ -196,11 +196,11 @@ public:
         try
         {
             result = curl_.execute();
-            lastStatus_ = curl_.getLastStatus();
+            setStatuses(curl_.getLastStatus());
         }
         catch(...)
         {
-            lastStatus_ = curl_.getLastStatus();
+            setStatuses(curl_.getLastStatus());
             throw;
         }
 
@@ -230,11 +230,11 @@ public:
         try
         {
             result = curl_.execute();
-            lastStatus_ = curl_.getLastStatus();
+            setStatuses(curl_.getLastStatus());
         }
         catch(...)
         {
-            lastStatus_ = curl_.getLastStatus();
+            setStatuses(curl_.getLastStatus());
             throw;
         }
 
@@ -245,4 +245,24 @@ public:
     {
         return lastStatus_;
     }
+
+    std::pair<size_t,size_t> TransportImpl::getStatus() const
+    {
+        return std::pair<size_t,size_t>(countFailStatus_,countGoodStatus_);
+    }
+
+
+    void TransportImpl::setStatuses(const StatusTransport::EnumType& status)
+    {
+        lastStatus_ = status;
+        if(status == StatusTransport::EnumType::OK)
+        {
+            ++countGoodStatus_;
+        }
+        else
+        {
+            ++countFailStatus_;
+        }
+    }
+
 }
