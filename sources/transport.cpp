@@ -234,6 +234,7 @@ public:
         }
         catch(...)
         {
+            std::cerr<<logger() <<"ERROR cUrl: " << service<<query << std::endl;
             setStatuses(curl_.getLastStatus());
             throw;
         }
